@@ -1,0 +1,45 @@
+;*------------------------------------------------------*
+;|文件名:	ieditor.mac									|
+;|作者:		Ihsoh										|
+;|创建时间:	2013-4-1									|
+;|														|
+;|描述:													|
+;|编辑器宏定义文件										|
+;*------------------------------------------------------*
+
+%IFNDEF	_IEDITOR_MAC_
+%DEFINE	_IEDITOR_MAC_
+
+;宏名:		PushAR
+;功能:		依次入栈AX, BX, CX, DX, SI, DI, BP, DS, ES
+;参数:		无
+;返回值:	无
+%MACRO PushAR 0
+	PUSHF
+	PUSH	AX
+	PUSH	BX
+	PUSH	CX
+	PUSH	DX
+	PUSH	SI
+	PUSH	DI
+	PUSH	BP
+	PUSH	DS
+	PUSH	ES
+%ENDMACRO
+
+;宏名:		PopAR
+;功能:		依次出栈ES, DS, BP, DI, SI, DX, CX, BX, AX
+%MACRO PopAR 0
+	POP		ES
+	POP		DS
+	POP		BP
+	POP		DI
+	POP		SI
+	POP		DX
+	POP		CX
+	POP		BX
+	POP		AX
+	POPF
+%ENDMACRO
+
+%ENDIF

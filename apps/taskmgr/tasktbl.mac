@@ -1,0 +1,55 @@
+;*------------------------------------------------------*
+;|文件名:	tasktbl.mac									|
+;|作者:		Ihsoh										|
+;|创建时间:	2013-3-28									|
+;|														|
+;|描述:													|
+;|进程表宏.												|
+;*------------------------------------------------------*
+
+;任务表宏
+%MACRO TaskTable 2
+%1:
+	%REP %2
+	DB 0			;是否使用?
+	TIMES 20 DB 0 	;文件名
+	
+	;寄存器
+	DW 0			;CS
+	DW 0			;IP
+	
+	DW 0			;Flags
+	DW 0			;AX
+	DW 0			;BX
+	DW 0			;CX
+	DW 0			;DX
+	DW 0			;SI
+	DW 0			;DI
+	DW 0			;BP
+	DW 0			;SP
+	DW 0			;DS
+	DW 0			;SS
+	DW 0			;ES
+	
+	%ENDREP
+%ENDMACRO
+
+TaskTableItemLen		EQU 49	;任务表长度
+
+;任务表各值偏移
+TT_Used			EQU 0
+TT_FileName		EQU 1
+TT_CS			EQU 21
+TT_IP			EQU 23
+TT_Flags		EQU 25
+TT_AX			EQU 27
+TT_BX			EQU 29
+TT_CX			EQU 31
+TT_DX			EQU 33
+TT_SI			EQU 35
+TT_DI			EQU 37
+TT_BP			EQU 39
+TT_SP			EQU 41
+TT_DS			EQU 43
+TT_SS			EQU 45
+TT_ES			EQU 47

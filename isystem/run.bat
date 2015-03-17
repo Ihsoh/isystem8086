@@ -1,0 +1,1 @@
+Bochs.exe -q -f isystem.bxrc

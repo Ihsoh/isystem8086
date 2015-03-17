@@ -1,0 +1,99 @@
+;*------------------------------------------------------*
+;|文件名:	em.mac										|
+;|作者:		Ihsoh										|
+;|创建时间:	2013-8-16									|
+;|														|
+;|描述:													|
+;|	EM的宏定义											|
+;*------------------------------------------------------*
+
+%IFNDEF	_EM_MAC_
+%DEFINE	_EM_MAC_
+
+;宏名:		EnterProd
+;描述:		进入保护模式. 在使用这个宏之前必须处在实模式, 16位
+;参数:		参数1=段地址所在内存的标号
+;返回值:	无
+%MACRO	EnterProd 1
+	CLI
+	CALL	LoadGDT
+	CALL	EnableA20
+	
+	MOV		[CS:%1], CS
+
+	MOV		[CS:RealMode_SS], SS
+	MOV		[CS:RealMode_DS], DS
+	MOV		[CS:RealMode_ES], ES
+	;MOV		[CS:RealMode_FS], FS
+	MOV		[CS:RealMode_GS], GS
+	MOV		[CS:RealMode_EAX], EAX
+	MOV		[CS:RealMode_EBX], EBX
+	MOV		[CS:RealMode_ECX], ECX
+	MOV		[CS:RealMode_EDX], EDX
+	MOV		[CS:RealMode_ESI], ESI
+	MOV		[CS:RealMode_EDI], EDI
+	MOV		[CS:RealMode_ESP], ESP
+	MOV		WORD [CS:RealMode_ESP + 2], 0
+	PUSHFD
+	POP		DWORD [CS:RealMode_Flags]
+	
+	MOV		EAX, CR0
+	OR		EAX, 1
+	MOV		CR0, EAX
+	
+	Jump16	CodeSel, %%Prod
+	
+	BITS	32
+	
+%%Prod:
+
+%ENDMACRO
+
+;宏名:		LeaveProd
+;描述:		离开保护模式. 在使用这个宏之前必须处在保护模式, 32位
+;参数:		参数1=段地址所在内存的标号
+;返回值:	无
+%MACRO	LeaveProd 1
+	MOV		AX, NormalSel
+	MOV		SS, AX
+	MOV		DS, AX
+	MOV		ES, AX
+	;MOV		FS, AX
+	MOV		GS, AX
+	
+	Jump32	Code16Sel, %%Prod16
+	
+	BITS	16
+	
+%%Prod16:
+	
+	MOV		EAX, CR0
+	AND		EAX, 0FFFFFFFEH
+	MOV		CR0, EAX
+	
+	;Jump16
+	DB	0EAH
+	DW	%%Real
+%1:	
+	DW	?
+	
+%%Real:
+
+	MOV		SS, [CS:RealMode_SS]
+	MOV		DS, [CS:RealMode_DS]
+	MOV		ES, [CS:RealMode_ES]
+	;MOV		FS, [CS:RealMode_FS]
+	MOV		GS, [CS:RealMode_GS]
+	MOV		EAX, [CS:RealMode_EAX]
+	MOV		EBX, [CS:RealMode_EBX]
+	MOV		ECX, [CS:RealMode_ECX]
+	MOV		EDX, [CS:RealMode_EDX]
+	MOV		ESI, [CS:RealMode_ESI]
+	MOV		EDI, [CS:RealMode_EDI]
+	MOV		ESP, [CS:RealMode_ESP]
+	PUSH	DWORD [CS:RealMode_Flags]
+	POPFD
+%ENDMACRO
+
+
+%ENDIF

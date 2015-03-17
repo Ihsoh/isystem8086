@@ -1,0 +1,9 @@
+megs: 256
+romimage: file=D:/Bochs-2.6/BIOS-Bochs-latest
+vgaromimage: file=D:/Bochs-2.6/VGABIOS-lgpl-latest 
+floppya: 1_44=isystem.img, status=inserted
+floppyb: 1_44=f1.img, status=inserted
+ata0-master: type=disk, mode=flat, path="isystemd.img"
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+mouse: enabled=0, toggle=ctrl+f10
+boot: floppy

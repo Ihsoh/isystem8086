@@ -1,0 +1,7 @@
+cls
+exec em
+
+rem Run gshell 
+rem exec gshell
+
+nexttask

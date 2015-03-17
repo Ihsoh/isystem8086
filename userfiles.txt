@@ -1,0 +1,13 @@
+autoexec|autoexec
+apps\taskmgr\bin\taskmgr.bin|taskmgr
+apps\taskmgr\taskmgr.cfg|taskmgr.cfg
+apps\shell\bin\shell.bin|shell
+apps\shell\_autoexec|_autoexec
+apps\gshell\bin\gshell.bin|gshell
+apps\em\bin\em.bin|em
+apps\ieditor16\bin\iedtr16.bin|ieditor16
+apps\iasm\bin\iasm.bin.a.pak|iasm.a.pak
+apps\iasm\bin\iasm.bin.b.pak|iasm.b.pak
+apps\iasmldr\bin\iasmldr.bin|iasm
+default.ifon|default.ifon
+helloworld|helloworld

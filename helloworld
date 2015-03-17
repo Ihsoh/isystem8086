@@ -1,0 +1,23 @@
+  ; Filename: helloworld
+  ; Author:   Ihsoh
+  ; Date:     2014-1-8
+  ; Descipt:  This program will print 'Hello, World!' to screen.
+  STR   'MTA16'
+  DW    Start
+  DBS   249
+LABEL Text
+  STR   'Hello, World!'
+  DB    13
+  DB    10
+  DB    0
+LABEL Start
+  MOVW  %AX, %CS
+  MOVW  %DS, %AX
+  MOVW  %ES, %AX
+  MOVW  %DS, %AX
+  MOVW  %SI, Text
+  MOVB  %AH, 4
+  INT   21H
+  MOVB  %AH, 0
+  INT   21H
+END

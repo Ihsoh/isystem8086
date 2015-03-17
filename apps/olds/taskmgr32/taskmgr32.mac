@@ -1,0 +1,166 @@
+;*------------------------------------------------------*
+;|文件名:	taskmgr32.mac								|
+;|作者:		Ihsoh										|
+;|创建时间:	2013-5-11									|
+;|														|
+;|概述:													|
+;|	任务管理器宏定义文件								|
+;*------------------------------------------------------*
+
+%IFNDEF	_TASKMGR32_MAC_
+%DEFINE	_TASKMGR32_MAC_
+
+;宏名:		INT21H_EnterReal
+;功能:		进入实模式. 该宏会让后面的代码变为16位模式!!!!
+;参数:		参数1=	在恢复各个段寄存器高速缓冲区的属性时
+;					所用的16位通用寄存器.
+;			参数2=	在切换到实模式时使用的32位通用寄存器.
+;			参数3(可选)=不进行设置的段寄存器名, 除SS和CS.
+;			参数4(可选)=不进行设置的段寄存器名, 除SS和CS.
+;返回值:	无
+%MACRO	INT21H_EnterReal 2-4
+	;保存保护模式的堆栈指针
+	MOV		%1, Taskmgr32DSel
+	MOV		DS, %1
+	MOV		[INT21H_SS], SS
+	MOV		[INT21H_ESP], ESP	
+
+	;恢复各个段寄存器的高速缓冲区的属性
+	MOV		%1, NormalSel
+	MOV		SS, %1
+	
+	%IF (%0 == 3) || (%0 == 4)
+		%IFNIDNI %3, DS
+			%IFNIDNI %4, DS
+				MOV		DS, %1
+			%ENDIF
+		%ENDIF
+		%IFNIDNI %3, ES
+			%IFNIDNI %4, ES
+				MOV		ES, %1
+			%ENDIF
+		%ENDIF
+		%IFNIDNI %3, FS
+			%IFNIDNI %4, FS
+				MOV		FS, %1
+			%ENDIF
+		%ENDIF
+		%IFNIDNI %3, GS
+			%IFNIDNI %4, GS
+				MOV		GS, %1
+			%ENDIF
+		%ENDIF
+	%ELSE
+		MOV		DS, %1
+		MOV		ES, %1
+		MOV		FS, %1
+		MOV		GS, %1
+	%ENDIF
+	
+	;恢复CS的段界限
+	Jump32	Taskmgr32C16Sel, %%INT21H_EnterReal_Bits16
+	
+	BITS	16
+	
+%%INT21H_EnterReal_Bits16:
+	
+	;切换回实模式
+	MOV		%2, CR0
+	AND		%2, 0FFFFFFFEH
+	MOV		CR0, %2
+	Jump16	Taskmgr32Seg, %%INT21H_EnterReal_Real
+	
+%%INT21H_EnterReal_Real:
+%ENDMACRO
+
+;宏名:		INT21H_EnterProd
+;功能:		进入保护模式
+;参数:		参数1=	为了将在正确的选择子保存在TSS, 把NormalSel
+;					装入到段寄存器而临时使用的16位段寄存器.
+;			参数2=	在切换到保护模式时使用的32位通用寄存器.
+;			参数3(可选)=不进行设置的段寄存器名, 除SS和CS.
+;			参数4(可选)=不进行设置的段寄存器名, 除SS和CS.
+;返回值:	无
+%MACRO	INT21H_EnterProd 2-4
+	MOV		%1, NormalSel
+	%IF (%0 == 3) || (%0 == 4)
+		%IFNIDNI %3, DS
+			%IFNIDNI %4, DS
+				MOV		DS, %1
+			%ENDIF
+		%ENDIF
+		%IFNIDNI %3, ES
+			%IFNIDNI %4, ES
+				MOV		ES, %1
+			%ENDIF
+		%ENDIF
+		%IFNIDNI %3, FS
+			%IFNIDNI %4, FS
+				MOV		FS, %1
+			%ENDIF
+		%ENDIF
+		%IFNIDNI %3, GS
+			%IFNIDNI %4, GS
+				MOV		GS, %1
+			%ENDIF
+		%ENDIF
+	%ELSE
+		MOV		DS, %1
+		MOV		ES, %1
+		MOV		FS, %1
+		MOV		GS, %1
+	%ENDIF
+	
+	MOV		%2, CR0
+	OR		%2, 1
+	MOV		CR0, %2
+	Jump16	Taskmgr32CSel, %%INT21H_EnterProd_Prod
+	
+%%INT21H_EnterProd_Prod:	
+
+	BITS	32
+%ENDMACRO
+
+;宏名:		INT21H_EnterReal_SS_ESP_DS
+;功能:		进入实模式并且设置SS, ESP和DS.
+;			SS=CS, ESP=[RealMode_ESP], DS=CS
+;参数:		参数1=16位通用寄存器.
+;			参数2=32位通用寄存器.
+;			参数3(可选)=不进行设置的段寄存器名, 除SS和CS.
+;			参数4(可选)=不进行设置的段寄存器名, 除SS和CS.
+;返回值:	无
+%MACRO	INT21H_EnterReal_SS_ESP_DS 2-4
+	%IF %0 == 3
+		INT21H_EnterReal	%1, %2, %3
+	%ELIF %0 == 4
+		INT21H_EnterReal	%1, %2, %3, %4
+	%ELSE
+		INT21H_EnterReal	%1, %2
+	%ENDIF
+	MOV		%1, CS
+	MOV		DS, %1
+	MOV		SS, %1
+	MOV		SP, [RealMode_ESP]
+%ENDMACRO
+
+;宏名:		INT21H_EnterProd_SS_ESP
+;功能:		进入保护模式并且设置SS和ESP.
+;			SS=[INT21H_SS], ESP=[INT21H_ESP]
+;参数:		参数1=16位通用寄存器.
+;			参数2=32位通用寄存器.
+;			参数3(可选)=不进行设置的段寄存器名, 除SS和CS.
+;			参数4(可选)=不进行设置的段寄存器名, 除SS和CS.
+;返回值:	无
+%MACRO	INT21H_EnterProd_SS_ESP 2-4
+	MOV		SS, [CS:INT21H_SS]
+	MOV		ESP, [CS:INT21H_ESP]
+	%IF %0 == 3
+		INT21H_EnterProd	%1, %2, %3
+	%ELIF %0 == 4
+		INT21H_EnterProd	%1, %2, %3, %4
+	%ELSE
+		INT21H_EnterProd	%1, %2
+	%ENDIF
+%ENDMACRO
+
+%ENDIF
